@@ -1,0 +1,49 @@
+[package]
+name = "binary-insight"
+version = "1.0.0"
+description = "Binary & Protocol Analyzer"
+authors = ["Binary Insight Team"]
+license = "MIT"
+repository = ""
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "1", features = [] }
+
+[dependencies]
+tauri = { version = "1", features = ["dialog-all", "fs-all", "path-all", "shell-open"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+thiserror = "1"
+anyhow = "1"
+log = "0.4"
+env_logger = "0.10"
+
+# Binary parsing
+byteorder = "1.5"
+nom = "7"
+memmap2 = "0.9"
+
+# Network / PCAP
+pcap-parser = "0.15"
+
+# Entropy / hashing
+sha2 = "0.10"
+md-5 = "0.10"
+
+# Lua scripting
+mlua = { version = "0.9", features = ["lua54", "vendored", "serialize"] }
+
+# AI / HTTP
+reqwest = { version = "0.12", features = ["json"] }
+
+# Database
+rusqlite = { version = "0.31", features = ["bundled"] }
+
+# Hex formatting
+hex = "0.4"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

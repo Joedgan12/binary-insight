@@ -1,73 +1,67 @@
-# Welcome to your Lovable project
+# Binary Insight
 
-## Project info
+A powerful desktop application for binary file analysis, network traffic inspection, and protocol decoding. Built with **Tauri** (Rust + React).
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- **Hex Viewer** — Virtualized hex view with color-coded regions, selection, bookmarks, go-to-offset
+- **Structure Tree** — Automatic format parsing (PNG, PE, ELF) with expandable field hierarchy
+- **Network Analysis** — PCAP import, packet list with BPF-like filtering, protocol layer drill-down, session flow diagrams
+- **Visualization** — Shannon entropy graph, byte frequency histogram, side-by-side binary diff
+- **AI Assistant** — Local LLM integration (Ollama) for structure analysis and field suggestions
+- **Lua Scripting** — Monaco-based editor with built-in templates for custom format parsers
+- **Export** — Hex dump, C byte array, JSON analysis report
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+| Layer | Technology |
+|-------|-----------|
+| Desktop | Tauri v1 (Rust) |
+| Frontend | React 18 + TypeScript + Vite 5 |
+| Styling | Tailwind CSS + shadcn/ui |
+| State | Zustand + Immer |
+| Scripting | Lua 5.4 (mlua) |
+| AI | Ollama (local LLM) |
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Quick Start
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
+- [Node.js](https://nodejs.org/) 18+
+- [Rust](https://rustup.rs/) (stable)
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Development (Web Only)
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Development (Desktop with Tauri)
+```bash
+npm install
+npm run tauri:dev
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Build for Production
+```bash
+npm run tauri:build
+```
 
-**Use GitHub Codespaces**
+## Documentation
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- [Architecture](docs/architecture.md) — System design and structure
+- [Scripting API](docs/scripting-api.md) — Lua scripting reference
+- [Contributing](docs/contributing.md) — Development guide
 
-## What technologies are used for this project?
+## Keyboard Shortcuts
 
-This project is built with:
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+O` | Open file |
+| `Ctrl+I` | Import PCAP |
+| `Ctrl+G` | Go to offset |
+| `Ctrl+F` | Search |
+| `Ctrl+P` | Command palette |
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## License
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+MIT
