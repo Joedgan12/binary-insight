@@ -16,14 +16,22 @@
         "all": true
       },
       "fs": {
-        "all": true,
-        "scope": ["**"]
+        "all": false,
+        "readFile": true,
+        "writeFile": true,
+        "readDir": true,
+        "scope": [
+          "$HOME/**",
+          "$DOCUMENT/**",
+          "$DOWNLOAD/**",
+          "$DESKTOP/**"
+        ]
       },
       "path": {
         "all": true
       },
       "shell": {
-        "open": true
+        "open": false
       }
     },
     "bundle": {
@@ -44,7 +52,7 @@
       "targets": "all"
     },
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' http://localhost:11434; font-src 'self' data:"
     },
     "windows": [
       {

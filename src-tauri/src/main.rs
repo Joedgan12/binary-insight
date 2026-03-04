@@ -10,6 +10,7 @@ mod network;
 mod scripting;
 mod ai;
 mod storage;
+mod security;
 
 use commands::{file_commands, network_commands, ai_commands, export_commands, script_commands};
 
