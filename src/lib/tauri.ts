@@ -86,7 +86,16 @@ export const tauriCommands = {
     invoke<any[]>('get_regions', { fileId }),
 
   diffFiles: (fileIdA: string, fileIdB: string) =>
-    invoke<any[]>('diff_files', { fileIdA, fileIdB }),
+    invoke<{
+      regions: Array<{ kind: string; start_a: number; end_a: number; start_b: number; end_b: number }>;
+      changedBytes: number;
+      sizeA: number;
+      sizeB: number;
+    }>('diff_files', { fileIdA, fileIdB }),
+
+  /** Write edited bytes back to the file on disk. */
+  saveFile: (fileId: string, bytes: number[], path: string) =>
+    invoke<void>('save_file', { fileId, bytes, path }),
 
   exportData: (fileId: string, options: ExportOptions) =>
     invoke<string>('export_data', { fileId, options }),
@@ -145,6 +154,18 @@ export const tauriCommands = {
 
   getBookmarks: (fileId: string) =>
     invoke<any[]>('get_bookmarks', { fileId }),
+
+  /** Write edited bytes back to the original file path. */
+  saveFile: (fileId: string, bytes: number[], path: string) =>
+    invoke<void>('save_file', { path, bytes }),
+
+  /** List recently opened files from the SQLite database. */
+  loadRecentFiles: () =>
+    invoke<{ path: string; name: string; format: string | null; size: number | null; last_opened: string }[]>('list_recent_files'),
+
+  /** Record a file open event in the recent_files table. */
+  recordRecentFile: (path: string, name: string, format: string | null, size: number) =>
+    invoke<void>('record_recent_file', { path, name, format, size }),
 };
 
 // ─── File Dialog ─────────────────────────────────────────────────────────────

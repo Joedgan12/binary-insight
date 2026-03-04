@@ -28,6 +28,9 @@ fn main() {
             file_commands::search_bytes,
             file_commands::search_string,
             file_commands::get_strings,
+            file_commands::save_file,
+            file_commands::list_recent_files,
+            file_commands::record_recent_file,
             // Network commands
             network_commands::load_pcap,
             network_commands::get_packet_detail,

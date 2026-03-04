@@ -162,3 +162,65 @@ pub async fn get_strings(path: String, min_length: Option<usize>) -> Result<Vec<
         .map(|(offset, value)| StringEntry { offset, value })
         .collect())
 }
+
+/// Save edited bytes back to a file on disk.
+#[tauri::command]
+pub async fn save_file(path: String, bytes: Vec<u8>) -> Result<(), String> {
+    std::fs::write(&path, &bytes).map_err(|e| format!("Failed to save file {:?}: {}", path, e))
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct RecentFileEntry {
+    pub path: String,
+    pub name: String,
+    pub format: Option<String>,
+    pub size: Option<u64>,
+    pub last_opened: String,
+}
+
+/// Return the list of recently-opened files from the SQLite database.
+#[tauri::command]
+pub fn list_recent_files(
+    db: tauri::State<crate::storage::AppDb>,
+) -> Result<Vec<RecentFileEntry>, String> {
+    let conn = db.conn.lock().map_err(|e| e.to_string())?;
+    let mut stmt = conn
+        .prepare(
+            "SELECT path, name, format, size, last_opened \
+             FROM recent_files ORDER BY last_opened DESC LIMIT 50",
+        )
+        .map_err(|e| e.to_string())?;
+    let rows = stmt
+        .query_map([], |row| {
+            Ok(RecentFileEntry {
+                path: row.get(0)?,
+                name: row.get(1)?,
+                format: row.get(2)?,
+                size: row.get(3)?,
+                last_opened: row.get(4).unwrap_or_default(),
+            })
+        })
+        .map_err(|e| e.to_string())?;
+    rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
+}
+
+/// Record that a file was opened (upsert into recent_files).
+#[tauri::command]
+pub fn record_recent_file(
+    path: String,
+    name: String,
+    format: Option<String>,
+    size: Option<u64>,
+    db: tauri::State<crate::storage::AppDb>,
+) -> Result<(), String> {
+    let conn = db.conn.lock().map_err(|e| e.to_string())?;
+    conn.execute(
+        "INSERT INTO recent_files (path, name, format, size, last_opened) \
+         VALUES (?1, ?2, ?3, ?4, datetime('now')) \
+         ON CONFLICT(path) DO UPDATE SET name=excluded.name, format=excluded.format, \
+         size=excluded.size, last_opened=datetime('now')",
+        rusqlite::params![path, name, format, size],
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
