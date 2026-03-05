@@ -15,17 +15,22 @@ import ScriptEditor from '@/components/scripting/ScriptEditor';
 import TemplateLibrary from '@/components/scripting/TemplateLibrary';
 import { useUIStore, type MainTab } from '@/store/uiStore';
 import { useFileStore } from '@/store/fileStore';
+import { useNavigate } from 'react-router-dom';
 import {
   FileText,
   Globe,
   BarChart3,
   Code,
   Binary,
-  PanelRight,
   Bot,
   GitCompareArrows,
+  Home,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const MAIN_TABS: { id: MainTab; icon: any; label: string }[] = [
   { id: 'hex', icon: FileText, label: 'Hex View' },
@@ -56,6 +61,7 @@ function EmptyState() {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
   const activeMainTab = useUIStore((s) => s.activeMainTab);
   const setActiveMainTab = useUIStore((s) => s.setActiveMainTab);
   const rightPanelCollapsed = useUIStore((s) => s.layout.aiPanelCollapsed);
@@ -63,16 +69,43 @@ const Index = () => {
   const sidebarCollapsed = useUIStore((s) => s.layout.sidebarCollapsed);
   const activeTabId = useFileStore((s) => s.activeTabId);
   const diffMode = useFileStore((s) => s.diffMode);
+  const diffFileId = useFileStore((s) => s.diffFileId);
+  const fileDataCache = useFileStore((s) => s.fileDataCache);
+  const tabs = useFileStore((s) => s.tabs);
+  const showSettings = useUIStore((s) => s.showSettings);
+  const setShowSettings = useUIStore((s) => s.setShowSettings);
+  const theme = useUIStore((s) => s.theme);
+  const setTheme = useUIStore((s) => s.setTheme);
 
   const hasFile = !!activeTabId;
+  const bytesA = activeTabId ? (fileDataCache[activeTabId]?.bytes ?? null) : null;
+  const bytesB = diffFileId ? (fileDataCache[diffFileId]?.bytes ?? null) : null;
+  const activeTabName = tabs.find((t) => t.id === activeTabId)?.name;
+  const diffTabName = diffFileId ? tabs.find((t) => t.id === diffFileId)?.name : undefined;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Sidebar */}
-      {!sidebarCollapsed && <AnalyzerSidebar />}
+    <div className="flex h-screen overflow-hidden bg-background flex-col">
+      {/* Header with navigation buttons */}
+      <div className="border-b border-border bg-card px-4 py-2 flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/')}
+          className="gap-2 text-muted-foreground hover:text-foreground"
+          title="Back to Home"
+        >
+          <Home className="w-4 h-4" />
+          <span className="text-xs">Home</span>
+        </Button>
+      </div>
 
-      {/* Main area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Main content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar */}
+        {!sidebarCollapsed && <AnalyzerSidebar />}
+
+        {/* Main area */}
+        <div className="flex-1 flex flex-col min-w-0">
         {/* File tabs */}
         <TabBar />
 
@@ -102,7 +135,7 @@ const Index = () => {
                     </TabsList>
 
                     <div className="ml-auto flex items-center gap-1 pr-2">
-                      {diffMode.enabled && (
+                      {diffMode && (
                         <span className="text-[10px] text-primary font-mono flex items-center gap-1 px-2">
                           <GitCompareArrows className="w-3 h-3" /> DIFF
                         </span>
@@ -124,10 +157,10 @@ const Index = () => {
 
                   {/* Hex View */}
                   <TabsContent value="hex" className="flex-1 flex flex-col m-0 min-h-0">
-                    {hasFile || true /* show mock data */? (
+                    {hasFile ? (
                       <ResizablePanelGroup direction="vertical">
                         <ResizablePanel defaultSize={65} minSize={30}>
-                          {diffMode.enabled ? <DiffView /> : <HexViewer />}
+                          {diffMode ? <DiffView bytesA={bytesA} bytesB={bytesB} nameA={activeTabName} nameB={diffTabName} /> : <HexViewer />}
                         </ResizablePanel>
                         <ResizableHandle withHandle />
                         <ResizablePanel defaultSize={35} minSize={15}>
@@ -141,7 +174,13 @@ const Index = () => {
 
                   {/* Network */}
                   <TabsContent value="network" className="flex-1 flex flex-col m-0 min-h-0">
-                    <ResizablePanelGroup direction="vertical">
+                    {!hasFile && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 border-b border-yellow-500/20 text-[11px] text-yellow-600 dark:text-yellow-400">
+                        <Globe className="w-3 h-3 shrink-0" />
+                        Demo mode — import a PCAP file to analyse real network traffic.
+                      </div>
+                    )}
+                    <ResizablePanelGroup direction="vertical" className="flex-1">
                       <ResizablePanel defaultSize={60} minSize={30}>
                         <PacketList />
                       </ResizablePanel>
@@ -162,7 +201,7 @@ const Index = () => {
                         <ByteHistogram />
                       </div>
                       <div className="col-span-full min-h-[300px]">
-                        <DiffView />
+                        <DiffView bytesA={bytesA} bytesB={bytesB} nameA={activeTabName} nameB={diffTabName} />
                       </div>
                     </div>
                   </TabsContent>
@@ -197,7 +236,40 @@ const Index = () => {
 
         {/* Status bar */}
         <StatusBar />
+        </div>
       </div>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-semibold">Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Theme</p>
+                <p className="text-xs text-muted-foreground">Switch between dark and light mode</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              >
+                {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+                {theme === 'dark' ? 'Light' : 'Dark'}
+              </Button>
+            </div>
+            <div className="border-t border-border pt-3 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Version</p>
+                <p className="text-xs text-muted-foreground font-mono">Binary Insight v1.0</p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

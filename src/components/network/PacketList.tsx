@@ -14,6 +14,8 @@ export default function PacketList() {
   const selectedPacketId = useNetworkStore((s) => s.selectedPacketId);
   const selectPacket = useNetworkStore((s) => s.selectPacket);
   const isCapturing = useNetworkStore((s) => s.isCapturing);
+  const startCapture = useNetworkStore((s) => s.startCapture);
+  const stopCapture = useNetworkStore((s) => s.stopCapture);
   const storePackets = useNetworkStore((s) => s.packets);
 
   // Use store packets or fallback to mock
@@ -48,6 +50,7 @@ export default function PacketList() {
       {/* Toolbar */}
       <div className="flex items-center gap-1 px-3 py-1 border-b border-border/50">
         <button
+          onClick={() => isCapturing ? stopCapture() : startCapture('default')}
           className={cn(
             'p-1 rounded transition-colors',
             isCapturing ? 'bg-red-500/20 text-red-400' : 'hover:bg-secondary/50 text-accent'
